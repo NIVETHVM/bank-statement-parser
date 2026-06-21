@@ -12,13 +12,20 @@ That's it — the GUI dropdown and auto-detect both pick it up automatically.
 from parsers.federal_bank import FederalBankParser
 from parsers.indusind_bank import IndusIndBankParser
 from parsers.idbi_bank import IDBIBankParser
+from parsers.hdfc_bank import HDFCBankParser
+from parsers.bank_of_baroda import BankOfBarodaParser
+from parsers.axis_bank import AxisBankParser
+from parsers.canara_bank import CanaraBankParser
 
 # Bank display name → parser class
 PARSER_REGISTRY = {
     "Federal Bank": FederalBankParser,
     "IndusInd Bank": IndusIndBankParser,
     "IDBI Bank": IDBIBankParser,
-    # "HDFC Bank": HDFCParser,        # add when ready
+    "HDFC Bank": HDFCBankParser,
+    "Bank of Baroda": BankOfBarodaParser,
+    "Axis Bank": AxisBankParser,
+    "Canara Bank": CanaraBankParser,
     # "SBI": SBIParser,               # add when ready
     # "ICICI Bank": ICICIParser,      # add when ready
 }
