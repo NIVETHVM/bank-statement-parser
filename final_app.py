@@ -18,6 +18,7 @@ Features:
 
 import os
 import sys
+import shutil
 import ctypes
 import threading
 import subprocess
@@ -42,14 +43,6 @@ import pytesseract
 
 from registry import get_parser_names, get_parser_class, detect_bank
 
-# ── EDIT THESE if poppler/tesseract aren't on your system PATH ────────────────
-POPPLER_PATH  = r"C:\Users\O M E N\Downloads\Release-26.02.0-0\poppler-26.02.0\Library\bin"   # e.g. r"C:\poppler\Library\bin"
-TESSERACT_CMD = r"C:\Program Files\Tesseract-OCR\tesseract.exe"  # e.g. r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-# ── Appearance ────────────────────────────────────────────────────────────────
-THEME = "darkly"   # other dark options: "cyborg", "vapor", "solar"
-
-
 def get_base_dir():
     """
     Return the folder this app lives in — works whether running as a plain
@@ -59,6 +52,50 @@ def get_base_dir():
         return Path(sys.executable).resolve().parent
     else:
         return Path(__file__).resolve().parent
+
+
+def find_poppler_path():
+    """
+    Bundled vendor copy first, then fall back to system PATH.
+    Checks both layouts: vendor/ next to the exe (flat / script mode), and
+    _internal/vendor/ (PyInstaller 6+ onedir default puts add-data there).
+    """
+    candidates = [
+        get_base_dir() / "vendor" / "poppler" / "Library" / "bin",
+        get_base_dir() / "_internal" / "vendor" / "poppler" / "Library" / "bin",
+    ]
+    for bundled in candidates:
+        if bundled.exists():
+            return str(bundled)
+    return None  # convert_from_path() uses PATH automatically when this is None
+
+
+def find_tesseract_cmd():
+    """
+    Bundled vendor copy first, then PATH, then the usual install location.
+    Checks both layouts: vendor/ next to the exe (flat / script mode), and
+    _internal/vendor/ (PyInstaller 6+ onedir default puts add-data there).
+    """
+    candidates = [
+        get_base_dir() / "vendor" / "Tesseract-OCR" / "tesseract.exe",
+        get_base_dir() / "_internal" / "vendor" / "Tesseract-OCR" / "tesseract.exe",
+    ]
+    for bundled in candidates:
+        if bundled.exists():
+            return str(bundled)
+    on_path = shutil.which("tesseract")
+    if on_path:
+        return on_path
+    default = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+    return str(default) if default.exists() else None
+
+
+# ── Poppler / Tesseract paths — resolved automatically, nothing to edit here ──
+POPPLER_PATH  = find_poppler_path()
+TESSERACT_CMD = find_tesseract_cmd()
+
+# ── Appearance ────────────────────────────────────────────────────────────────
+THEME = "darkly"   # other dark options: "cyborg", "vapor", "solar"
 
 
 def get_output_dir():
